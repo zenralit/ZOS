@@ -1,4 +1,4 @@
-
+#include <stdint.h>
 #include "screen.h"
 #include "idt.h"
 #include "keyboard.h"
@@ -13,12 +13,13 @@ void kernel_main() {
 
   
     idt_init();
- keyboard_input();
-  
+    keyboard_init();
+
     asm volatile("sti");
+    
 
    
-    while (1) {
+    while (1) {  
         asm volatile("hlt");
     }
 }

@@ -1,5 +1,3 @@
-; обработчик IRQ1 (клавиатура)
-[BITS 32]
 global irq1_handler
 extern keyboard_input
 
@@ -10,4 +8,3 @@ irq1_handler:
     mov al, 0x20
     out 0x20, al
     iret
-

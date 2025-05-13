@@ -7,6 +7,15 @@ struct IDTPtr {
     uint32_t base;
 } __attribute__((packed));
 
+struct IDTEntry {
+    uint16_t low_offset;  
+    uint16_t sel;           
+    uint8_t  always0;      
+    uint8_t  flags;         
+    uint16_t high_offset;
+} __attribute__((packed));
+
+
 void load_idt_register(struct IDTPtr*);
 void idt_init();
 void set_idt_gate(int n, uint32_t handler);

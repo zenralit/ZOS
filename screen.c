@@ -1,11 +1,11 @@
 #include "screen.h"
 #include "ports.h"
 #include <stdint.h>
-
+#define VGA_ADDRESS 0xB8000
 #define MAX_ROWS 25
 #define MAX_COLS 80
 #define WHITE_ON_BLACK 0x0F
-
+//uint16_t* VIDEO_MEMORY = (uint16_t*) VGA_ADDRESS;
 static uint16_t* const VIDEO_MEMORY = (uint16_t*)0xB8000;
 static int cursor_offset = 0;
 
@@ -18,11 +18,10 @@ static void update_cursor() {
 }
 
 void clear_screen() {
-    for (int i = 0; i < MAX_ROWS * MAX_COLS; i++) {
+     for (int i = 0; i < 80 * 25; i++) {
         VIDEO_MEMORY[i] = (WHITE_ON_BLACK << 8) | ' ';
     }
     cursor_offset = 0;
-    update_cursor();
 }
 
 void put_char(char c) {
