@@ -9,7 +9,7 @@
 void kernel_main() {
   
     clear_screen();
-    print("Keyboard Ready > ");
+    print("Welocome in NawOS");
 
   
     idt_init();
