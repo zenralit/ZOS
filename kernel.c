@@ -3,6 +3,7 @@
 #include "idt.h"
 #include "keyboard.h"
 #include "ports.h"
+#include "fat12.h"
 
 void dummy_timer_callback() {
     

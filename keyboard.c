@@ -1,7 +1,7 @@
 #include "keyboard.h"
-#include "ports.h"
 #include "screen.h"
-#include <stdint.h>
+#include "ports.h"
+#include "fat12.h"  
 #include <string.h>
 
 #define MAX_INPUT 128
@@ -56,6 +56,10 @@ void process_command(const char* input) {
     } else if (strncmp(input, "echo ", 5) == 0) {
         print(input + 5);  
         print("\n");
+    } else if (strcmp(input, "ls") == 0) {
+    list_root_dir();
+    } else if (strncmp(input, "touch ", 6) == 0) {
+    create_file(input + 6);
     } else {
         print("Unknown command. Type 'help' for help.\n");
     }
