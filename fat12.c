@@ -13,7 +13,7 @@
 static uint8_t sector_buffer[SECTOR_SIZE];
 
 typedef struct {
-    char name[8];
+    char filename[8];
     char ext[3];
     uint8_t attr;
     uint8_t reserved[10];
@@ -23,7 +23,7 @@ typedef struct {
     uint32_t size;
 } __attribute__((packed)) DirEntry;
 
-// BIOS interrupt 13h — read sector from floppy
+
 int read_sector(uint8_t* buffer, uint32_t lba) {
     uint8_t chs[] = {
         0x00, // Drive number (A:)
@@ -33,7 +33,7 @@ int read_sector(uint8_t* buffer, uint32_t lba) {
         0x01, // Count
         0x00  // Buffer segment offset
     };
-    // TODO: Use inline assembly or BIOS calls
+    
     return 0; // success
 }
 
@@ -66,17 +66,33 @@ void list_root_dir() {
         print("\n");
     }
 }
+
+int write_sector(const uint8_t* buffer, uint32_t lba) {
+    outb(0x1F6, 0xE0);                        
+    outb(0x1F2, 1);                           
+    outb(0x1F3, lba & 0xFF);
+    outb(0x1F4, (lba >> 8) & 0xFF);
+    outb(0x1F5, (lba >> 16) & 0xFF);
+    outb(0x1F6, 0xE0 | ((lba >> 24) & 0x0F)); 
+    outb(0x1F7, 0x30);                        
+
+    for (int i = 0; i < SECTOR_SIZE / 2; i++) {
+        outw(0x1F0, ((uint16_t*)buffer)[i]);
+    }
+
+    return 0;
+}
 int create_file(const char* filename) {
     uint8_t sector[SECTOR_SIZE];
     read_sector(sector, ROOT_DIR_SECTOR);
     DirEntry* entries = (DirEntry*)sector;
 
     for (int i = 0; i < MAX_ROOT_ENTRIES; i++) {
-        if (entries[i].name[0] == 0x00 || entries[i].name[0] == 0xE5) {
+        if (entries[i].filename[0] == 0x00 || entries[i].filename[0] == 0xE5) {
             memset(&entries[i], 0, sizeof(DirEntry));
 
             
-            memset(entries[i].name, ' ', 11);
+            memset(entries[i].filename, ' ', 11);
             int len = strlen(filename);
             int dot = -1;
             for (int j = 0; j < len; j++) {
@@ -84,12 +100,12 @@ int create_file(const char* filename) {
                     dot = j;
                     break;
                 }
-                if (j < 8) entries[i].name[j] = filename[j];
+                if (j < 8) entries[i].filename[j] = filename[j];
             }
 
             if (dot != -1) {
                 for (int j = dot + 1, k = 0; j < len && k < 3; j++, k++) {
-                    entries[i].name[8 + k] = filename[j];
+                    entries[i].filename[8 + k] = filename[j];
                 }
             }
 
@@ -107,19 +123,4 @@ int create_file(const char* filename) {
 
     print("Root directory full.\n");
     return -1;
-}
-int write_sector(const uint8_t* buffer, uint32_t lba) {
-    outb(0x1F6, 0xE0);                        // Master drive
-    outb(0x1F2, 1);                           // One sector
-    outb(0x1F3, lba & 0xFF);
-    outb(0x1F4, (lba >> 8) & 0xFF);
-    outb(0x1F5, (lba >> 16) & 0xFF);
-    outb(0x1F6, 0xE0 | ((lba >> 24) & 0x0F)); // LBA bits
-    outb(0x1F7, 0x30);                        // Write command
-
-    for (int i = 0; i < SECTOR_SIZE / 2; i++) {
-        outw(0x1F0, ((uint16_t*)buffer)[i]);
-    }
-
-    return 0;
 }
