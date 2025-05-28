@@ -5,9 +5,12 @@ LD   = ld
 CFLAGS  = -m32 -ffreestanding -O2 -Wall
 LDFLAGS = -m elf_i386
 
-OBJS = kernel_entry.o idt.o irq1.o screen.o keyboard.o ports.o kernel.o idt_load.o
+OBJS = kernel_entry.o idt.o irq1.o screen.o keyboard.o ports.o kernel.o idt_load.o irq0.o
 
 all: os-image.bin
+
+irq0.o: irq0.asm
+	$(AS) -f elf32 $< -o $@
 
 bootloader.bin: bootloader.asm
 	$(AS) -f bin $< -o $@
@@ -31,7 +34,7 @@ ports.o: ports.c ports.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 kernel.o: kernel.c
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c kernel.c -o $@
 
 idt_load.o: idt_load.asm
 	$(AS) -f elf32 $< -o $@

@@ -2,14 +2,16 @@
 #include "screen.h"
 #include "idt.h"
 #include "keyboard.h"
-//#include "ports.h"
+#include "ports.h"
 
-
+void dummy_timer_callback() {
+    
+}
 
 void kernel_main() {
   
     clear_screen();
-    print("Welocome in NawOS");
+    print("Welocome in NawOS. try keyboard >>>   ");
 
   
     idt_init();
