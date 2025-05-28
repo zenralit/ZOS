@@ -11,7 +11,8 @@ void dummy_timer_callback() {
 void kernel_main() {
   
     clear_screen();
-    print("Welocome in NawOS. try keyboard >>>   ");
+    print("Welocome in NawOS.\n");
+    print("print command >>>>\n");
 
   
     idt_init();
