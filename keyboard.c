@@ -1,7 +1,7 @@
 #include "keyboard.h"
 #include "screen.h"
 #include "ports.h"
-#include "fat12.h"  
+#include "nawfs.h"  
 #include <string.h>
 
 #define MAX_INPUT 128
@@ -18,13 +18,13 @@ static const char scancode_map[128] = {
     0, ' ', 0,
 };
 
-int strcmp(const char* s1, const char* s2) {
-    while (*s1 && (*s1 == *s2)) {
-        s1++;
-        s2++;
-    }
-    return *(const unsigned char*)s1 - *(const unsigned char*)s2;
-}
+// int strcmp(const char* s1, const char* s2) {
+//     while (*s1 && (*s1 == *s2)) {
+//         s1++;
+//         s2++;
+//     }
+//     return *(const unsigned char*)s1 - *(const unsigned char*)s2;
+// }
 
 int strncmp(const char* s1, const char* s2, size_t n) {
     for (size_t i = 0; i < n; i++) {
@@ -49,6 +49,8 @@ void process_command(const char* input) {
         print("clear - Clear screen\n");
         print("reboot - Reboot system\n");
         print("echo <text> - Print text to the screen\n");
+        print("ls - show files\n");
+        print("cf - create file\n");
     } else if (strcmp(input, "clear") == 0) {
         clear_screen();
     } else if (strcmp(input, "reboot") == 0) {
@@ -57,10 +59,38 @@ void process_command(const char* input) {
         print(input + 5);  
         print("\n");
     } else if (strcmp(input, "ls") == 0) {
-    list_root_dir();
-    } else if (strncmp(input, "touch ", 6) == 0) {
-    create_file(input + 6);
-    } else {
+    fs_list();
+    } else if (strncmp(input, "cf ", 3) == 0) {
+    const char* fname = input + 3;
+        char name[9] = {0}, ext[4] = {0};
+        int i = 0;
+        while (*fname && *fname != '.' && i < 8) name[i++] = *fname++;
+        name[i] = '\0';
+        if (*fname == '.') fname++;
+        i = 0;
+        while (*fname && i < 3) ext[i++] = *fname++;
+        ext[i] = '\0';
+
+        if (fs_create(name, ext) == 0)
+            print("File created\n");
+        else
+            print("Create failed\n");
+    } else if (strncmp(input, "rm ", 3) == 0) {
+        const char* fname = input + 3;
+        char name[9] = {0}, ext[4] = {0};
+        int i = 0;
+        while (*fname && *fname != '.' && i < 8) name[i++] = *fname++;
+        name[i] = '\0';
+        if (*fname == '.') fname++;
+        i = 0;
+        while (*fname && i < 3) ext[i++] = *fname++;
+        ext[i] = '\0';
+
+        if (fs_delete(name, ext) == 0)
+            print("Deleted\n");
+        else
+            print("Delete failed\n");
+    }else {
         print("Unknown command. Type 'help' for help.\n");
     }
     print("\n> ");

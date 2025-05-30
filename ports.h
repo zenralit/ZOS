@@ -15,7 +15,10 @@ static inline void outb(uint16_t port, uint8_t val) {
 static inline void io_wait() {
     asm volatile ("outb %%al, $0x80" : : "a"(0));
 }
-void outw(uint16_t port, uint16_t data);
+void outw(uint16_t port, uint16_t val);
 
+uint16_t inw(uint16_t port);
+#define ATA_PRIMARY_IO 0x1F0
+#define ATA_MASTER 0xE0
 #endif
 

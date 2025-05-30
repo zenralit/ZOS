@@ -20,7 +20,7 @@ start:
     mov ah,0x0E
     int 0x10
     jmp .print
-
+                            ;пиздаа
 .load:
      mov ah, 0x02        ; функция чтения секторов
     mov al, 10          ; количество секторов

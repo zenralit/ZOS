@@ -38,7 +38,7 @@ void put_char(char c) {
     }
 
     if (cursor_offset >= MAX_ROWS * MAX_COLS * 2) {
-        clear_screen();  
+        clear_screen();  // простая реализация: очищаем экран при переполнении
     }
 
     update_cursor();

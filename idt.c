@@ -43,7 +43,7 @@ void idt_init() {
     idt_ptr.limit = sizeof(idt) - 1;
     load_idt_register(&idt_ptr);
 
-    // Разрешаем IRQ1 (клавиатура)
+
     uint8_t mask = inb(0x21) & ~(1 << 1);
     outb(0x21, mask);
 }
