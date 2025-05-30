@@ -49,8 +49,11 @@ void process_command(const char* input) {
         print("clear - Clear screen\n");
         print("reboot - Reboot system\n");
         print("echo <text> - Print text to the screen\n");
-        print("ls - show files\n");
-        print("cf - create file\n");
+        print("ls - Show files\n");
+        print("cf <name.ext> - Create file\n");
+        print("cat <name.ext> - Show file content\n");
+        print("df <name.ext> - Delete file\n");
+        print("wr <text> - <name.***> - Write to file\n");
     } else if (strcmp(input, "clear") == 0) {
         clear_screen();
     } else if (strcmp(input, "reboot") == 0) {
@@ -75,7 +78,26 @@ void process_command(const char* input) {
             print("File created\n");
         else
             print("Create failed\n");
-    } else if (strncmp(input, "rm ", 3) == 0) {
+    } 
+    else if (strncmp(input, "cat ", 4) == 0) {
+        const char* fname = input + 4;
+        char name[9] = {0}, ext[4] = {0};
+        int i = 0;
+        while (*fname && *fname != '.' && i < 8) name[i++] = *fname++;
+        name[i] = '\0';
+        if (*fname == '.') fname++;
+        i = 0;
+        while (*fname && i < 3) ext[i++] = *fname++;
+        ext[i] = '\0';
+
+        const char* data = fs_read(name, ext);
+        if (data)
+            print(data);
+        else
+            print("Not found\n");
+        print("\n");
+    }
+    else if (strncmp(input, "df ", 3) == 0) {
         const char* fname = input + 3;
         char name[9] = {0}, ext[4] = {0};
         int i = 0;
@@ -90,7 +112,38 @@ void process_command(const char* input) {
             print("Deleted\n");
         else
             print("Delete failed\n");
-    }else {
+    }else if (strncmp(input, "wr ", 3) == 0) {
+        const char* args = input + 3;
+        const char* dash = strstr(args, " - ");
+        if (!dash) {
+            print("Syntax: wr <text> - <name.***>\n");
+        } else {
+            int text_len = dash - args;
+            char content[128] = {0};
+            char fname[13] = {0};
+            strncpy(content, args, text_len);
+            content[text_len] = '\0';
+
+            const char* fstart = dash + 3;
+            int i = 0;
+            while (*fstart && i < 12) fname[i++] = *fstart++;
+            fname[i] = '\0';
+
+            char name[9] = {0}, ext[4] = {0};
+            i = 0;
+            const char* p = fname;
+            while (*p && *p != '.' && i < 8) name[i++] = *p++;
+            name[i] = '\0';
+            if (*p == '.') p++;
+            i = 0;
+            while (*p && i < 3) ext[i++] = *p++;
+            ext[i] = '\0';
+
+            if (fs_write(name, ext, content) == 0)
+                print("Written\n");
+            else
+                print("Write failed\n");
+        } } else {
         print("Unknown command. Type 'help' for help.\n");
     }
     print("\n> ");
