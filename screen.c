@@ -50,3 +50,7 @@ void print(const char* str) {
     }
 }
 
+void print_backspace() {
+    put_char('\b');
+}
+
