@@ -50,9 +50,9 @@ void process_command(const char* input) {
         print("reboot - Reboot system\n");
         print("echo <text> - Print text to the screen\n");
         print("ls - Show files\n");
-        print("cf <name.ext> - Create file\n");
-        print("cat <name.ext> - Show file content\n");
-        print("df <name.ext> - Delete file\n");
+        print("cf <name.***> - Create file\n");
+        print("cat <name.***> - Show file content\n");
+        print("df <name.***> - Delete file\n");
         print("wr <text> - <name.***> - Write to file\n");
     } else if (strcmp(input, "clear") == 0) {
         clear_screen();
