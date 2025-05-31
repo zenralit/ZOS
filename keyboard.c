@@ -18,6 +18,23 @@ void* memcpy(void* dest, const void* src, size_t n);
 void uint8_to_hex(uint8_t val, char* out);
 int atoi(const char* str);
 
+int strcmp(const char* s1, const char* s2) {
+    while (*s1 && (*s1 == *s2)) {
+        s1++; s2++;
+    }
+    return *(unsigned char*)s1 - *(unsigned char*)s2;
+}
+
+char* strstr(const char* haystack, const char* needle) {
+    if (!*needle) return (char*)haystack;
+    for (; *haystack; haystack++) {
+        if ((*haystack == *needle) && (strncmp(haystack, needle, strlen(needle)) == 0)) {
+            return (char*)haystack;
+        }
+    }
+    return NULL;
+}
+
 static const char scancode_map[128] = {
     0, 27, '1','2','3','4','5','6','7','8','9','0','-','=', '\b',
     '\t','q','w','e','r','t','y','u','i','o','p','[',']','\n', 0,
