@@ -5,35 +5,26 @@
 #include "disk.h"
 #include <stddef.h>
 
-
 #define INPUT_BUFFER_SIZE 256
 #define MAX_INPUT 128
 #define PORT_KBD_DATA 0x60
+
 char input_buffer[INPUT_BUFFER_SIZE];
 int input_pos = 0;
 
 char* find_char(const char* str, char ch);
-
 void* memcpy(void* dest, const void* src, size_t n);
 void uint8_to_hex(uint8_t val, char* out);
 int atoi(const char* str);
+void keyboard_handle_interrupt();
+int strcmp(const char* s1, const char* s2);
+char* strstr(const char* haystack, const char* needle);
+void reboot();
+int strncmp(const char* s1, const char* s2, size_t n);
 
-int strcmp(const char* s1, const char* s2) {
-    while (*s1 && (*s1 == *s2)) {
-        s1++; s2++;
-    }
-    return *(unsigned char*)s1 - *(unsigned char*)s2;
-}
 
-char* strstr(const char* haystack, const char* needle) {
-    if (!*needle) return (char*)haystack;
-    for (; *haystack; haystack++) {
-        if ((*haystack == *needle) && (strncmp(haystack, needle, strlen(needle)) == 0)) {
-            return (char*)haystack;
-        }
-    }
-    return NULL;
-}
+
+// -------- keyboard map -------- //
 
 static const char scancode_map[128] = {
     0, 27, '1','2','3','4','5','6','7','8','9','0','-','=', '\b',
@@ -43,24 +34,7 @@ static const char scancode_map[128] = {
     0, ' ', 0,
 };
 
-void reboot() {
-    uint8_t good = 0x02;
-    while (good & 0x02)
-        good = inb(0x64);
-    outb(0x64, 0xFE);
-}
-
-int strncmp(const char* s1, const char* s2, size_t n) {
-    for (size_t i = 0; i < n; i++) {
-        if (s1[i] != s2[i]) {
-            return (unsigned char)s1[i] - (unsigned char)s2[i];
-        }
-        if (s1[i] == '\0') {
-            return 0;
-        }
-    }
-    return 0;
-}
+// -------- keyboard map -------- //
 
 void process_command(const char* input) {
     if (strcmp(input, "help") == 0) {
@@ -210,6 +184,10 @@ void process_command(const char* input) {
     input_buffer[0] = 0;
 }
 
+
+// --------- функции --------- //
+
+
 void handle_input(char c) {
     if (c == '\b' && input_pos > 0) {
         input_pos--;
@@ -226,8 +204,10 @@ void handle_input(char c) {
     }
 }
 
-void keyboard_handle_scancode() {
-    uint8_t scancode = inb(PORT_KBD_DATA);
+void keyboard_handle_scancode(uint8_t scancode) {
+
+    if (scancode & 0x80) return;  
+    scancode = inb(PORT_KBD_DATA);
     if (scancode & 0x80) return;
 
     char c = scancode_map[scancode];
@@ -249,13 +229,10 @@ void keyboard_handle_scancode() {
 }
 
 void keyboard_init() {
+    print("IRQ1\n");
     uint8_t mask = inb(0x21);
     outb(0x21, mask & ~0x02);
 }
-
-// Вспомогательные функции
-
-
 
 char* find_char(const char* str, char ch) {
     while (*str) {
@@ -289,8 +266,47 @@ int atoi(const char* str) {
     return res;
 }
 
+void keyboard_handle_interrupt() {
+   
+    uint8_t scancode = port_byte_in(0x60);
+    keyboard_handle_scancode(scancode); 
+    port_byte_out(0x20, 0x20); 
+}
 
+int strcmp(const char* s1, const char* s2) {
+    while (*s1 && (*s1 == *s2)) {
+        s1++; s2++;
+    }
+    return *(unsigned char*)s1 - *(unsigned char*)s2;
+}
 
+char* strstr(const char* haystack, const char* needle) {
+    if (!*needle) return (char*)haystack;
+    for (; *haystack; haystack++) {
+        if ((*haystack == *needle) && (strncmp(haystack, needle, strlen(needle)) == 0)) {
+            return (char*)haystack;
+        }
+    }
+    return NULL;
+}
 
+void reboot() {
+    uint8_t good = 0x02;
+    while (good & 0x02)
+        good = inb(0x64);
+    outb(0x64, 0xFE);
+}
+
+int strncmp(const char* s1, const char* s2, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+        if (s1[i] != s2[i]) {
+            return (unsigned char)s1[i] - (unsigned char)s2[i];
+        }
+        if (s1[i] == '\0') {
+            return 0;
+        }
+    }
+    return 0;
+}
 
 

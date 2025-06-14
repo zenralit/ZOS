@@ -14,26 +14,30 @@
 nawfs_entry entries[MAX_FILES];
 char file_data[SECTOR_SIZE * (MAX_FILES + 1)];
 int file_count = 0;
-
+static uint8_t fs_buffer[SECTOR_SIZE];
 
 void fs_init() {
-    uint8_t buffer[SECTOR_SIZE];
+    // asm volatile("cli"); 
 
-   
-    file_count = 0;
-    for (int i = 1; i <= CATALOG_SECTORS; i++) {
-        if (disk_read_sector(i, buffer) != 0) {
-            print("FS: failed to read catalog sector\n");
-            return;
-        }
 
-        for (int j = 0; j < SECTOR_SIZE / sizeof(nawfs_entry); j++) {
-            nawfs_entry* e = (nawfs_entry*)(buffer + j * sizeof(nawfs_entry));
-            if (e->name[0] != 0 && file_count < MAX_FILES) {
-                entries[file_count++] = *e;
-            }
-        }
-    }
+    // for (int i = 1; i <= CATALOG_SECTORS; i++) {
+    //     if (disk_read_sector(i, fs_buffer) != 0) {
+    //         print("FS: failed to read catalog sector\n");
+    //         asm volatile("sti"); 
+    //         return;
+    //     }
+
+    //     for (int j = 0; j < SECTOR_SIZE / sizeof(nawfs_entry); j++) {
+    //         nawfs_entry* e = (nawfs_entry*)(fs_buffer + j * sizeof(nawfs_entry));
+    //         if (e->name[0] != 0 && file_count < MAX_FILES) {
+    //             entries[file_count++] = *e;
+    //         }
+    //     }
+    // }
+
+    // asm volatile("sti"); 
+
+     print("It doesn't work yet, but I'll fix it soon\n");
 }
 
 void fs_flush() {

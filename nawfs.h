@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+
 #define MAX_FILES 64
 #define FILENAME_LEN 8
 #define EXTENSION_LEN 3
@@ -14,8 +15,8 @@
 typedef struct {
     char name[FILENAME_LEN];      // 8
     char ext[EXTENSION_LEN];      // 3
-    uint16_t size;                // 2
-    uint16_t sector;              // 2
+    uint32_t size;                // 2
+    uint32_t sector;              // 2
     char reserved[17];            // 17 
 } nawfs_entry;
 
@@ -32,4 +33,7 @@ char* strncpy(char* dest, const char* src, unsigned int n);
 void itoa(int value, char* str);
 unsigned int strlen(const char* str);
 int strcmp(const char* s1, const char* s2);
+extern nawfs_entry entries[MAX_FILES];
+extern int file_count;
+
 #endif

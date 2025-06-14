@@ -5,11 +5,11 @@ LD   = ld
 CFLAGS  = -m32 -ffreestanding -O2 -Wall
 LDFLAGS = -m elf_i386
 
-OBJS = kernel_entry.o idt.o irq1.o screen.o keyboard.o ports.o kernel.o idt_load.o irq0.o nawfs.o disk.o
+OBJS = kernel_entry.o idt.o irq1.o screen.o keyboard.o ports.o kernel.o idt_load.o nawfs.o disk.o
 
 all: os-image.bin
 
-disk.0: disk.c disc.h
+disk.0: disk.c disk.h
 	$(CC) $(CFLAGS) -c $< -o $@
 
 nawfs.o: nawfs.c nawfs.h ports.h screen.h keyboard.h
@@ -45,6 +45,9 @@ kernel.o: kernel.c
 idt_load.o: idt_load.asm
 	$(AS) -f elf32 $< -o $@
 
+nawfs.img:
+	dd if=/dev/zero of=nawfs.img bs=512 count=65536
+
 kernel.bin: $(OBJS) linker.ld
 	$(LD) $(LDFLAGS) -T linker.ld -o $@ $(OBJS)
 
@@ -52,8 +55,7 @@ os-image.bin: bootloader.bin kernel.bin
 	cat bootloader.bin kernel.bin > $@
 
 run: os-image.bin
-	qemu-system-i386 -fda os-image.bin -net none 
-
+	qemu-system-i386 -drive file=os-image.bin,format=raw,index=0,if=floppy \
+	-drive file=nawfs.img,format=raw,index=1,if=ide -net none
 clean:
 	rm -f *.o *.bin os-image.bin
-

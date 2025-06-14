@@ -1,7 +1,10 @@
 #ifndef IDT_H
 #define IDT_H
-
+#pragma once
 #include <stdint.h>
+extern void irq0();
+extern void irq1();
+
 struct IDTPtr {
     uint16_t limit;
     uint32_t base;
@@ -16,6 +19,8 @@ struct IDTEntry {
 } __attribute__((packed));
 
 
+extern void irq0(); 
+extern void irq1(); 
 void load_idt_register(struct IDTPtr*);
 void idt_init();
 void set_idt_gate(int n, uint32_t handler);
